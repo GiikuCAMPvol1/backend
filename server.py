@@ -3,10 +3,25 @@ import logging
 from websocket_server import WebsocketServer
 
 
-# TODO:
-# message_received で使う関数を生やす
-# dict でやりとりする? (JSON との変換は message_received の方でやる)
-def userId_request(req: dict) -> dict:
+def join_room(req: dict) -> dict:
+    return
+
+def create_room(req: dict) -> dict:
+    return
+
+def end_code_phase(req: dict) -> dict:
+    return
+
+def end_answer_phase(req: dict) -> dict:
+    return
+
+def open_next_result(req: dict) -> dict:
+    return
+
+def user_id(req: dict) -> dict:
+    return
+
+def start_game(req: dict) -> dict:
     return
 
 def main():
