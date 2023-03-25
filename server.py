@@ -1,5 +1,6 @@
 import logging
-
+import json
+import uuid #print(uuid.uuid1())
 from websocket_server import WebsocketServer
 
 
@@ -36,6 +37,26 @@ def main():
 
     def message_received(client: dict, server: WebsocketServer, message: str):
         print(f'ID={client["id"]} から "{message}" を受信しました')
+        data = json.loads(message)
+        print(data['type'])
+        if data['type']=="joinRoomRequest":#部屋参加リクエスト
+            print(1)
+        elif data['type']=="createRoomRequest":#部屋作成リクエスト
+            print(uuid.uuid1())
+        elif data['type']=="endCodePhaseRequest":#コーディング完了リクエスト
+            print(3)
+        elif data['type']=="endAnswerPhaseRequesta":#推測終了リクエスト
+            print(4)
+        elif data['type']=="openNextResultRequest":#開示リクエスト
+            print(5)
+        elif data['type']=="userIdRequest":#ユーザーIDリクエスト
+            userIdResponse = {
+                "type": "userIdResponse",
+                "userId": data['userId'],
+                "token": data['token'],
+            }
+            enc = json.dumps(userIdResponse,indent = 2)
+            server.send_message_to_all(enc)
         # TODO:
         # 1. message (JSON な文字列) をデコードする (dict が得られるはず)
         # 2. type に応じて適当な関数を呼び出す
