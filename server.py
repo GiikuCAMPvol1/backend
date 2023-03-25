@@ -3,6 +3,8 @@ import json
 import uuid #print(uuid.uuid1())
 from websocket_server import WebsocketServer
 
+# 発行した user_id と token を記録
+user_token = dict()
 
 def join_room(req: dict) -> dict:
     return
@@ -19,8 +21,27 @@ def end_answer_phase(req: dict) -> dict:
 def open_next_result(req: dict) -> dict:
     return
 
-def user_id(req: dict) -> dict:
-    return
+def request_user_id(req: dict) -> dict:
+    res = {
+        'type': 'userIdResponse'
+    }
+    # userId と token がリクエストに含まれている場合
+    if ('userId' in req) and ('token' in req):
+        user_id = req['userId']
+        token = req['token']
+        # サーバーが持っているデータと相違ないか検証
+        if user_token.get(user_id, '') == token:
+            # 提出された userId と token をレスポンスに乗せて返す
+            res['userId'] = user_id
+            res['token'] = token
+            return res
+    # userId と token を新規に発行する
+    user_id = uuid.uuid4().hex
+    token = uuid.uuid4().hex
+    user_token[user_id] = token
+    res['userId'] = user_id
+    res['token'] = token
+    return res
 
 def start_game(req: dict) -> dict:
     return
@@ -50,13 +71,13 @@ def main():
         elif data['type']=="openNextResultRequest":#開示リクエスト
             print(5)
         elif data['type']=="userIdRequest":#ユーザーIDリクエスト
-            userIdResponse = {
-                "type": "userIdResponse",
-                "userId": data['userId'],
-                "token": data['token'],
-            }
-            enc = json.dumps(userIdResponse,indent = 2)
-            server.send_message_to_all(enc)
+            response = request_user_id(data)
+            # 読みやすいエンコード(デバッグ出力用)
+            # _enc = json.dumps(response, indent=2)
+            # print(_enc)
+            # コンパクトなエンコード(通信用)
+            enc = json.dumps(response, separators=(',', ':'))
+            server.send_message(client, enc)
         # TODO:
         # 1. message (JSON な文字列) をデコードする (dict が得られるはず)
         # 2. type に応じて適当な関数を呼び出す
