@@ -1,6 +1,7 @@
 import logging
 import json
 import uuid #print(uuid.uuid1())
+import random
 from collections import defaultdict
 
 from websocket_server import WebsocketServer
@@ -11,8 +12,11 @@ room_member_id = defaultdict(list)
 #map<string,vector<strinng>>; roomIdに対して所属するメンバーのusernameを保持する。
 room_member_name = defaultdict(list)
 
-#部屋のIdを持つ配列 
-room_name = [] 
+# map<string, Client>;  userId に対応する websocket-server のクライアントを保持
+userId_client = defaultdict(list)
+
+#部屋のIdを持つ配列
+room_name = []
 
 #map<string,string> ;userid->username
 name_id = {}
@@ -157,10 +161,12 @@ def main():
         print(data['type'])
         if data['type']=="joinRoomRequest":#部屋参加リクエスト
             response = join_room(data)
+            userId_client[data['userId']] = client
             enc = json.dumps(response, separators=(',',':'))
             server.send_message(client, enc)
         elif data['type']=="createRoomRequest":#部屋作成リクエスト
             response = create_room(data)
+            userId_client[data['userId']] = client
             enc = json.dumps(response, separators=(',',':'))
             server.send_message(client, enc)
         elif data['type']=="endPhaseRequest":#状態終了リクエスト
@@ -181,8 +187,10 @@ def main():
             server.send_message(client, enc)
         elif data['type']=="startGameRequest":#ゲーム開始リクエスト
             response = start_game(data)
-            enc = json.dumps(response, separators=(',',':'))
-            server.send_message(client, enc)
+            for member_id, problem in zip(room_member_id[data['roomId']], random.sample(text, len(room_member_id[data['roomId']]))):
+                response['data'] = problem
+                enc = json.dumps(response, separators=(',',':'))
+                server.send_message(userId_client[member_id], enc)
         elif data['type']=="userIdRequest":#ユーザーIDリクエスト
             response = request_user_id(data)
             enc = json.dumps(response, separators=(',', ':'))
