@@ -17,10 +17,17 @@ room_name = []
 #map<string,string> ;userid->username
 name_id = {}
 
-
-
 # 発行した user_id と token を記録
 user_token = dict()
+
+#問題
+text = [
+    "長さNの整数列A = (A1,A2,...AN)が与えられます。Aから偶数だけすべて取り出し、もとの順番を保って出力してください。",
+    "英小文字からなる文字列Sが与えられます。Sの各文字を英大文字に変換して得られる文字列Tを出力してください。",
+    "0と1の2種類の文字からなる文字列Sが与えられます。Sに含まれる0を1に、1を0に置き換えた文字列を出力してください。",
+    "N個の文字列S1,S2,...SNがこの順番で与えられます。SN,SN-1,...S1の順番で出力してください。",
+    "N個の整数A1,A2,...ANが与えられます。N個の整数を合計した値を求めてください。"
+]
 
 def join_room(req: dict) -> dict:
     res = {
@@ -65,8 +72,12 @@ def start_game(req: dict) -> dict:
     res = {
         "type": "onPhaseStart",
         "phase": "",
-        "data": "<string>"
+        "data": ""
     }
+    room_Id = req['roomId']
+    siz = len(room_member_name)
+    res['phase'] = "coding"
+    res['data'] = text[3]
     return res
 
 def end_phase(req: dict) -> dict:
@@ -126,7 +137,7 @@ def main():
             response = create_room(data)
             enc = json.dumps(response, separators=(',',':'))
             server.send_message(client, enc)
-        elif data['type']=="endPhaseRequest":#終了リクエスト
+        elif data['type']=="endPhaseRequest":#状態終了リクエスト
             response = end_phase(data)
             enc = json.dumps(response, separators=(',',':'))
             server.send_message(client, enc)
