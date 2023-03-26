@@ -177,10 +177,10 @@ def main():
         print(data['type'])
         if data['type'] == "joinRoomRequest":  # 部屋参加リクエスト
             on_room_user_list_update, join_room_response = join_room(data)
-            on_room_user_list_update_json = json.dumps(on_room_user_list_update, separators=(',', ':'))
-            server.send_message_to_all(on_room_user_list_update_json)
             join_room_response_json = json.dumps(join_room_response, separators=(',', ':'))
             server.send_message(client, join_room_response_json)
+            on_room_user_list_update_json = json.dumps(on_room_user_list_update, separators=(',', ':'))
+            server.send_message_to_all(on_room_user_list_update_json)
         elif data['type'] == "createRoomRequest":  # 部屋作成リクエスト
             response = create_room(data)
             enc = json.dumps(response, separators=(',', ':'))
