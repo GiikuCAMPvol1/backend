@@ -17,8 +17,17 @@ room_name = []
 #map<string,string> ;userid->username
 name_id = {}
 
+#map<string,bool> ;useiid->推測|コーディング終了したか。
+id_bool = {}
+
 # 発行した user_id と token を記録
 user_token = dict()
+
+#codeを記録する配列
+ans_code = defaultdict(list)
+
+#answerを記録する配列
+ans_str = defaultdict(list)
 
 #問題
 text = [
@@ -27,6 +36,8 @@ text = [
     "0と1の2種類の文字からなる文字列Sが与えられます。Sに含まれる0を1に、1を0に置き換えた文字列を出力してください。",
     "N個の文字列S1,S2,...SNがこの順番で与えられます。SN,SN-1,...S1の順番で出力してください。",
     "N個の整数A1,A2,...ANが与えられます。N個の整数を合計した値を求めてください。"
+    "5つの整数A,B,C,D,Eが与えられます。この中に何種類の整数があるか出力してください。",
+    "サッカーワールドカップは西暦年を4で割った余りが2である年の6月に行われます。現在がY年の1月であるとき、次のワールドカップはいつ開催されますか？（入力として整数Yが与えられます。）",
 ]
 
 def join_room(req: dict) -> dict:
@@ -86,6 +97,21 @@ def end_phase(req: dict) -> dict:
 def open_next_result(req: dict) -> dict:
     return
 
+def state_update(req: dict) -> dict:
+    res = {
+        "type": "onStateUpdate",
+        "users": []
+    }
+    id1 = req['userId']
+    res['users'].append(
+        {
+            "userId": req['userId'],
+            "username": name_id[id1],
+            "complated": True
+        }
+    )
+    return res
+
 def request_user_id(req: dict) -> dict:
     res = {
         'type': 'userIdResponse'
@@ -138,7 +164,15 @@ def main():
             enc = json.dumps(response, separators=(',',':'))
             server.send_message(client, enc)
         elif data['type']=="endPhaseRequest":#状態終了リクエスト
-            response = end_phase(data)
+            response = state_update(data)
+            flag = True
+            for S in id_bool :
+                if S==False :
+                    flag = True
+            if flag == True :
+                response2 = end_phase(data)
+                enc2 = json.dumps(response2, separators=(',',':'))
+                server.send_message(client, enc2)
             enc = json.dumps(response, separators=(',',':'))
             server.send_message(client, enc)
         elif data['type']=="openNextResultRequest":#開示リクエスト
